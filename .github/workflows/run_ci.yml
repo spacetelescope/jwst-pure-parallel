@@ -1,0 +1,40 @@
+# This workflow tests the run of pytest
+# and if pytest-cov is available, the coverage report
+name: Run pytest
+on:
+  workflow_dispatch:
+    
+permissions:
+  contents: read
+
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    name: run pytests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[tests]
+
+      - name: Run pytests
+        id: run_pytests
+        shell: bash
+        run: |
+          echo "# Pytest Results :rocket: " >> $GITHUB_STEP_SUMMARY
+          pytest --cache-clear --vv $GITHUB_STEP_SUMMARY 
+
+      - name: check_error
+        if: ${{ cancelled() || steps.run_pytests.outcome != 'success'}}
+        run: exit 1

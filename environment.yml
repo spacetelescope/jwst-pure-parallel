@@ -1,0 +1,10 @@
+# This will create an environment called jwpure and
+# install jwpure from github 
+# use: conda env create -f environment.yml
+name: jwpure
+dependencies:
+ - astropy
+ - pip
+ - python
+ - pip:
+   - git+https://github.com/spacetelescope/jwst-pure-parallel.git 
