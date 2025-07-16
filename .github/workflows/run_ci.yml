@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           echo "# Pytest Results :rocket: " >> $GITHUB_STEP_SUMMARY
-          pytest --cache-clear --vv $GITHUB_STEP_SUMMARY 
+          pytest --cache-clear -vv $GITHUB_STEP_SUMMARY 
 
       - name: check_error
         if: ${{ cancelled() || steps.run_pytests.outcome != 'success'}}
