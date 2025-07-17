@@ -35,7 +35,10 @@ class Scenario:
             config (jwpure.query.DatabaseTable): config table params
             visit (jwpure.query.DatabaseTable): visit table params
         '''
-        slot = DatabaseTable('slot', 'inst', 'slotdur', 'dec', 'pure_subset')
+        slot = DatabaseTable(
+            'slot', 'inst', 'slotdur', 'ra', 'dec', 'elat', 'glat',
+            'pure_subset'
+        )
         config = DatabaseTable('config', 'nslot')
         visit = DatabaseTable('visit', 'nconfig')
         return slot, config, visit
