@@ -1,5 +1,4 @@
-# This workflow tests the run of pytest
-# and if pytest-cov is available, the coverage report
+# This workflow runs pytest for minimal validation
 name: Run pytest
 on:
   workflow_dispatch:
