@@ -59,9 +59,15 @@ class DatabaseTable:
     '''
     def __init__(self, tablename, *colnames):
         self.tablename = tablename
+        self.parameters = colnames
         for colname in colnames:
             setattr(self, colname, DatabaseColumn(colname, tablename))
 
+    def __str__(self):
+        return '\n'.join([
+            f'{self.tablename}.{p}' for p in self.parameters
+            if p not in ['pure_subset']
+        ])
 
 class DatabaseColumn:
     '''Represent a column in a database table. Support expression operators.
