@@ -24,6 +24,7 @@ class Scenario:
         for colname in colnames:
             slotdata[colname] = 0
         self.create_database_table('slot', slotdata)
+        self.where_joint = 'No query'
         self.pure_subset = 0
 
     @staticmethod
@@ -97,6 +98,7 @@ class Scenario:
 
         # Make new `subset` table. Jointly apply all constraints.
         where_joint = where_clause(constraint)
+        self.where_joint = where_joint
         self.cursor.execute('DROP TABLE IF EXISTS subset')
         self.cursor.execute(f'''
             CREATE TABLE subset AS
@@ -158,7 +160,7 @@ class Scenario:
             WHERE slot_id IN (SELECT slot_id FROM subset)
         ''')
 
-    def summarize(self, table='slot'):
+    def summarize(self, path=None, table='slot'):
         '''Summarize slot information in a table.'''
         query = (
             f'SELECT'
@@ -176,7 +178,14 @@ class Scenario:
         rows = self.cursor.fetchall()
         colnames = [desc[0] for desc in self.cursor.description]
         table = Table(rows=rows, names=colnames)
+        if path:
+            with open(path, 'w') as fobj:
+                for line in table.pformat(max_width=None):
+                    fobj.write(f'{line}\n')
+                fobj.write(f'{self.where_joint}\n')
+            print(f'wrote {path}')
         table.pprint()
+        return table
 
     def save(self, path):
         '''Save information about pure parallel slots to a file.'''
