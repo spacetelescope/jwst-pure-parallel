@@ -24,7 +24,7 @@ class Scenario:
         for colname in colnames:
             slotdata[colname] = 0
         self.create_database_table('slot', slotdata)
-        self.where_joint = 'No query'
+        self.where_joint = []
         self.pure_subset = 0
 
     @staticmethod
@@ -98,7 +98,7 @@ class Scenario:
 
         # Make new `subset` table. Jointly apply all constraints.
         where_joint = where_clause(constraint)
-        self.where_joint = where_joint
+        self.where_joint.append(where_joint)
         self.cursor.execute('DROP TABLE IF EXISTS subset')
         self.cursor.execute(f'''
             CREATE TABLE subset AS
@@ -182,7 +182,8 @@ class Scenario:
             with open(path, 'w') as fobj:
                 for line in table.pformat(max_width=None):
                     fobj.write(f'{line}\n')
-                fobj.write(f'{self.where_joint}\n')
+                for i, where_joint in enumerate(self.where_joint):
+                    fobj.write(f'Subset {i+1}: {where_joint}\n')
             print(f'wrote {path}')
         table.pprint()
         return table
