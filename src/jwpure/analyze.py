@@ -39,7 +39,7 @@ class Scenario:
             'slot', 'inst', 'slotdur', 'ra', 'dec', 'elat', 'glat',
             'pure_subset'
         )
-        config = DatabaseTable('config', 'nslot')
+        config = DatabaseTable('config', 'nslot', 'configdur')
         visit = DatabaseTable('visit', 'nconfig')
         return slot, config, visit
 
@@ -72,7 +72,7 @@ class Scenario:
         self.cursor.execute('DROP TABLE IF EXISTS config')
         self.cursor.execute(f'''
             CREATE TABLE config AS
-            SELECT visit_id, config_id, COUNT(*) nslot
+            SELECT visit_id, config_id, COUNT(*) nslot, SUM(slotdur) configdur
             FROM slot
             {where_slot}
             GROUP BY visit_id, config_id
