@@ -36,12 +36,22 @@ class Scenario:
             config (jwpure.query.DatabaseTable): config table params
             visit (jwpure.query.DatabaseTable): visit table params
         '''
-        slot = DatabaseTable(
-            'slot', 'inst', 'slotdur', 'ra', 'dec', 'elat', 'glat',
-            'pure_subset'
-        )
-        config = DatabaseTable('config', 'nslot', 'configdur')
-        visit = DatabaseTable('visit', 'nconfig')
+        slot = DatabaseTable('slot', {
+            'inst': 'Prime instrument (MIRI, NIRCam, NIRISS, NIRSpec)',
+            'slotdur': 'Duration [s] of the parallel slot',
+            'ra': 'Right ascension [deg] of the prime visit',
+            'dec': 'Declination [deg] of the prime visit',
+            'elat': 'Ecliptic latitude [deg] of the prime visit',
+            'glat': 'Galactic latitude [deg] of the prime visit',
+            'pure_subset': 'subset created by allocate_slots (e.g., 1, 2, 3)',
+        })
+        config = DatabaseTable('config', {
+            'nslot': 'number of parallel exposure slots in configuration',
+            'configdur': 'total slot duration [s] in configuration',
+        })
+        visit = DatabaseTable('visit', {
+            'nconfig': 'total number of parallel configurations in vist',
+        })
         return slot, config, visit
 
 

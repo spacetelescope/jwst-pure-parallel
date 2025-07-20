@@ -54,33 +54,34 @@ class DatabaseTable:
     '''Represent a database table. Contain DatabaseColumn objects.
 
     Args:
-        tablename (str): name of table that contains the specified columns
-        *colnames (str): tuple of column names in the specified table
+        table (str): name of table that contains the specified columns
+        columns (dict): keys are column names, values are column descriptions
     '''
-    def __init__(self, tablename, *colnames):
-        self.tablename = tablename
-        self.parameters = colnames
-        for colname in colnames:
-            setattr(self, colname, DatabaseColumn(colname, tablename))
+    def __init__(self, table, columns):
+        self.table = table
+        self.columns = columns
+        for colname in columns:
+            setattr(self, colname, DatabaseColumn(colname, table))
 
     def __str__(self):
         return '\n'.join([
-            f'{self.tablename}.{p}' for p in self.parameters
-            if p not in ['pure_subset']
+            f'{self.table}.{colname} - {coldesc}'
+            for colname, coldesc in self.columns.items()
+            if colname not in ['pure_subset']
         ])
 
 class DatabaseColumn:
     '''Represent a column in a database table. Support expression operators.
 
     Args:
-        tablename (str): name of table that contains the specified column
+        table (str): name of table that contains the specified column
         colname (str): name of column in the specified table
     '''
-    def __init__(self, colname, tablename=''):
-        self.tablename = tablename
+    def __init__(self, colname, table=''):
+        self.table = table
         self.colname = colname
-        if tablename:
-            self.name = f'{tablename}.{colname}'
+        if table:
+            self.name = f'{table}.{colname}'
         else:
             self.name = colname
 
