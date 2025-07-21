@@ -43,14 +43,14 @@ class Scenario:
             'dec': 'Declination [deg] of the prime visit',
             'elat': 'Ecliptic latitude [deg] of the prime visit',
             'glat': 'Galactic latitude [deg] of the prime visit',
-            'pure_subset': 'subset created by allocate_slots (e.g., 1, 2, 3)',
+            'pure_subset': 'Subset created by allocate_slots (e.g., 1, 2, 3)',
         })
         config = DatabaseTable('config', {
-            'nslot': 'number of parallel exposure slots in configuration',
-            'configdur': 'total slot duration [s] in configuration',
+            'nslot': 'Number of parallel exposure slots in configuration',
+            'configdur': 'Total slot duration [s] in configuration',
         })
         visit = DatabaseTable('visit', {
-            'nconfig': 'total number of parallel configurations in vist',
+            'nconfig': 'Total number of parallel configurations in vist',
         })
         return slot, config, visit
 
