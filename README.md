@@ -1,6 +1,21 @@
 # JWST Pure Parallel
 
-Assess JWST pure parallel opportunities for specific observing requirements.
+The `jwpure` software package facilitates statistical analysis of JWST pure
+parallel observing scenarios, based on historical data from previous observing
+cycles. The package supports planning and evaluation of future pure parallel
+programs by quantifying the availability of past observing opportunities under
+specific constraints (e.g., prime instrument, number of required instrument
+configurations, exposure time, number of dithers, position in the sky) needed
+for a future program.
+
+Unlike coordinated parallel observations, where both the primary and parallel
+observations are specified in the same program and managed by a single
+observer, pure parallel exposures are proposed independently and must fit
+into predefined time windows ("slots") at pointings dictated by the prime
+observation. Each previous cycle offers a independent assessment of slot
+availability in future cycles, though the number and nature of available
+slots depends on the suite of accepted prime programs and varies from
+one cycle to the next.
 
 ## Table of Contents
 
@@ -70,22 +85,25 @@ The output should look something like:
 ```ascii
 cycle pure_subset nslot nconfig nvisit hours
 ----- ----------- ----- ------- ------ -----
-    1           0 25465    7466   2525  3153
-    1           1  1764     588    196   226
-    1           2   252      84     28    28
-    1           3   636     212    106    83
-    2           0 23840    7143   2761  2404
-    2           1   945     315    105   139
-    2           2    63      21      7     7
-    2           3   474     158     79    60
-    3           0 17077    4205   1853  2576
-    3           1  1131     377    127   150
+    1           0 22017    6558   2173  2708
+    1           1  1530     510    170   194
+    1           2   189      63     21    20
+    1           3   528     176     88    71
+    2           0 16940    4998   1824  1968
+    2           1   855     285     95   125
+    2           2    54      18      6     6
+    2           3   462     154     77    58
+    3           0 15223    3886   1618  2315
+    3           1  1083     361    121   145
     3           2   189      63     21    23
-    3           3   342     114     57    51
-    4           0 24454    6535   2454  3550
-    4           1  1197     399    133   155
-    4           2    81      27      9     8
-    4           3   378     126     63    52
+    3           3   330     110     55    49
+    4           0 24028    6642   2475  3540
+    4           1  1395     465    155   176
+    4           2   216      72     24    23
+    4           3   420     140     70    56
+Subset 1: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 3)
+Subset 2: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 3)
+Subset 3: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 2)
 wrote scenario_slots.csv
 ```
 Output is sorted by observing cycle. Each previous cycle provides a rough estimate of what might be available in future cycles. Each cycle has one row for unallocated slots (`pure_subset == 0`) and one row for each pass (`pure_subset > 0`).
