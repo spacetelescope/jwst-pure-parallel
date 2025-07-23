@@ -17,6 +17,8 @@ availability in future cycles, though the number and nature of available
 slots depends on the suite of accepted prime programs and varies from
 one cycle to the next.
 
+[Documentation wiki](https://github.com/spacetelescope/jwst-pure-parallel/wiki)
+
 ## Table of Contents
 
 - [Installation](#installation)
