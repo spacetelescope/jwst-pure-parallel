@@ -205,7 +205,12 @@ class Scenario:
 
     def save(self, path):
         '''Save information about pure parallel slots to a file.'''
-        query = 'SELECT * FROM slot WHERE pure_subset > 0 ORDER BY slot_id'
+        query = (
+            'SELECT * '
+            'FROM slot '
+            'WHERE pure_subset > 0 '
+            'ORDER BY cycle, slot_id'
+        )
         self.raw_query(query, path=path)
 
     def raw_query(self, query, path=None):
