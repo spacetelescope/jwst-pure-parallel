@@ -87,22 +87,22 @@ The output should look something like:
 ```ascii
 cycle pure_subset nslot nconfig nvisit hours
 ----- ----------- ----- ------- ------ -----
-    1           0 22017    6558   2173  2708
-    1           1  1530     510    170   194
-    1           2   189      63     21    20
-    1           3   528     176     88    71
-    2           0 16940    4998   1824  1968
-    2           1   855     285     95   125
+    1           0 20564    6096   2074  2433
+    1           1  1197     399    133   140
+    1           2   153      51     17    16
+    1           3   498     166     83    67
+    2           0 16035    4719   1769  1818
+    2           1   711     237     79   100
     2           2    54      18      6     6
-    2           3   462     154     77    58
-    3           0 15223    3886   1618  2315
-    3           1  1083     361    121   145
-    3           2   189      63     21    23
-    3           3   330     110     55    49
-    4           0 24028    6642   2475  3540
-    4           1  1395     465    155   176
-    4           2   216      72     24    23
-    4           3   420     140     70    56
+    2           3   468     156     78    59
+    3           0 14201    3571   1553  2149
+    3           1   840     280     94   104
+    3           2   117      39     13    13
+    3           3   300     100     50    44
+    4           0 23181    6285   2382  3228
+    4           1   954     318    106   112
+    4           2   126      42     14    13
+    4           3   402     134     67    54
 Subset 1: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 3)
 Subset 2: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 3)
 Subset 3: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 2)
