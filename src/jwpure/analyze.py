@@ -56,7 +56,8 @@ class Scenario:
 
 
     def allocate_slots(
-            self, constraint, maxslot=999, maxconfig=999, trace_id=None):
+            self, constraint=None, maxslot=999, maxconfig=999,
+            trace_id=None):
         '''Allocate pure parallel slots that obey the specifed constraints.
 
         Algorithm:
@@ -79,7 +80,11 @@ class Scenario:
         available = (slot.pure_subset == 0)
 
         # Create new `config` table. Apply slot constraint to available slots.
-        where_slot = where_clause(constraint & available, only_table='slot')
+        if constraint:
+            full_constraint = constraint & available
+        else:
+            full_constraint = available
+        where_slot = where_clause(full_constraint, only_table='slot')
         self.cursor.execute('DROP TABLE IF EXISTS config')
         self.cursor.execute(f'''
             CREATE TABLE config AS
