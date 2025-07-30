@@ -127,13 +127,21 @@ class Scenario:
             trace_id, 'subset', f'Subset {self.pure_subset}, subset table'
         )
 
-        # Assign sequence numbers to visits, configs, and slots.
+        # Index `subset` table.
+        self.cursor.execute('''
+            CREATE INDEX idx_slot_id_subset
+            ON subset(slot_id)
+        ''')
+
+        # Fetch visit, configuration, and slot IDs.
         self.cursor.execute('''
             SELECT visit_id, config_id, slot_id
             FROM subset
             ORDER BY slot_id
         ''')
         rows = self.cursor.fetchall()
+
+        # Create empty `sequence_numbers` table.
         sequence_numbers = self._sequence_numbers(rows, maxslot, maxconfig)
         self.cursor.execute('DROP TABLE IF EXISTS sequence_numbers')
         self.cursor.execute('''
@@ -142,6 +150,8 @@ class Scenario:
                 pure_subset INTEGER, pure_visit INTEGER,
                 pure_config INTEGER, pure_slot INTEGER)
         ''')
+
+        # Bulk insert values into empty `sequence_numbers` table.
         self.cursor.executemany('''
             INSERT INTO sequence_numbers (
                 visit_id, config_id, slot_id,
@@ -152,6 +162,12 @@ class Scenario:
             trace_id, 'sequence_numbers',
             f'Subset {self.pure_subset}, subset table'
         )
+
+        # Index `sequence_numbers` table.
+        self.cursor.execute('''
+            CREATE INDEX idx_slot_id_sequence_numbers
+            ON sequence_numbers(slot_id)
+        ''')
 
         # Update `slot.pure_subset` to indicate slots used in this subset.
         self.cursor.execute(f'''
@@ -241,6 +257,11 @@ class Scenario:
         placeholders = ', '.join(['?'] * len(coldefs))
         insert_statement = f"INSERT INTO {tablename} VALUES ({placeholders})"
         self.cursor.executemany(insert_statement, table.as_array().tolist())
+        if 'slot_id' in table.colnames:
+            self.cursor.execute(f'''
+                CREATE INDEX {f'idx_slot_id_{tablename}'}
+                ON {tablename}(slot_id)
+            ''')
 
     def _trace(self, trace_id, table, title):
         '''Print rows in the specified table for the specified visit.'''
