@@ -30,12 +30,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[tests]
 
-      - name: Run pytests
-        id: run_pytests
+      - name: Run pytest and coverage
+        id: run_pytest
         shell: bash
         run: |
           echo "# Pytest Results :rocket: " >> $GITHUB_STEP_SUMMARY
-          pytest  >> $GITHUB_STEP_SUMMARY 
+          pytest  --cache-clear --cov --cov-report=  >> $GITHUB_STEP_SUMMARY 
+          echo "# Coverage Report :bowtie: " >> $GITHUB_STEP_SUMMARY
+          echo "$(coverage report --format=markdown)" >> $GITHUB_STEP_SUMMARY
+
 
       - name: check_error
         if: ${{ cancelled() || steps.run_pytests.outcome != 'success'}}
