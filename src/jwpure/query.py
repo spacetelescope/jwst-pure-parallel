@@ -2,19 +2,19 @@
 
 
 def where_clause(constraint, only_table=None):
-    '''Return a full WHERE clause (or empty string) for the filtered table.'''
+    """Return a full WHERE clause (or empty string) for the filtered table."""
     sql = sql_from_constraint(constraint, only_table=only_table)
     return f'WHERE {sql}' if sql else ''
 
 
 def sql_from_constraint(constraint, only_table=None):
-    '''Generate SQL for an parsed expression that constrains database columns.
+    """Generate SQL for an parsed expression that constrains database columns.
 
     Args:
         constraint (_LogicalPredicate | _UnaryPredicate | _BinaryPredicate |
                     _TernaryPredicate): hierarchical tree of predicates
         only_table (str): optional, include only predicates for specified table
-    '''
+    """
     if constraint is None:
         return ''
     if isinstance(constraint, _BinaryPredicate):
@@ -51,12 +51,12 @@ def sql_from_constraint(constraint, only_table=None):
 
 
 class DatabaseTable:
-    '''Represent a database table. Contain DatabaseColumn objects.
+    """Represent a database table. Contain DatabaseColumn objects.
 
     Args:
         table (str): name of table that contains the specified columns
         columns (dict): keys are column names, values are column descriptions
-    '''
+    """
     def __init__(self, table, columns):
         self.table = table
         self.columns = columns
@@ -70,13 +70,14 @@ class DatabaseTable:
             if colname not in ['pure_subset']
         ])
 
+
 class DatabaseColumn:
-    '''Represent a column in a database table. Support expression operators.
+    """Represent a column in a database table. Support expression operators.
 
     Args:
         table (str): name of table that contains the specified column
         colname (str): name of column in the specified table
-    '''
+    """
     def __init__(self, colname, table=''):
         self.table = table
         self.colname = colname
@@ -117,7 +118,7 @@ class DatabaseColumn:
 
 
 class _Expression:
-    '''Base class for predicates that support logical composition.'''
+    """Base class for predicates that support logical composition."""
     def __and__(self, other):
         return _LogicalPredicate('AND', self, other)
 
@@ -129,7 +130,7 @@ class _Expression:
 
 
 class _BinaryPredicate(_Expression):
-    '''Represent a binary comparison predicate (e.g., col = value).'''
+    """Represent a binary comparison predicate (e.g., col = value)."""
     def __init__(self, colname, operator, value):
         self.colname = colname
         self.operator = operator
@@ -137,7 +138,7 @@ class _BinaryPredicate(_Expression):
 
 
 class _TernaryPredicate(_Expression):
-    '''Represent a range predicate (e.g., col BETWEEN low AND high).'''
+    """Represent a range predicate (e.g., col BETWEEN low AND high)."""
     def __init__(self, colname, low, high):
         self.colname = colname
         self.low = low
@@ -145,13 +146,13 @@ class _TernaryPredicate(_Expression):
 
 
 class _UnaryPredicate(_Expression):
-    '''Represents a unary SQL predicate (e.g., IS NULL, IS NOT NULL).'''
+    """Represents a unary SQL predicate (e.g., IS NULL, IS NOT NULL)."""
     def __init__(self, raw_sql):
         self.raw_sql = raw_sql
 
 
 class _LogicalPredicate(_Expression):
-    '''Represents a logical combination of predicates (AND, OR, NOT).'''
+    """Represents a logical combination of predicates (AND, OR, NOT)."""
     def __init__(self, op, *args):
         self.op = op
         self.args = args

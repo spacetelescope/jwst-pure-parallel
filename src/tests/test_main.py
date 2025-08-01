@@ -1,11 +1,11 @@
 from csv import DictReader
 from importlib import resources
 
-from pytest import fail, fixture
+import pytest
 from jwpure.analyze import Scenario
 
 
-@fixture
+@pytest.fixture
 def inp_path():
     path = resources.files('jwpure.data') / 'pure_slots.csv'
     return path
@@ -63,15 +63,12 @@ def test_allslots(inp_path, tmp_path_factory):
                     f"input='{in_val}', output='{out_val}'"
                 )
 
-        # Step 3: Ensure no extra rows exist
-        try:
-            next_in = next(inp_reader)
-            fail("Input file has more rows than output file.")
-        except StopIteration:
-            pass
+        # Step 3: Ensure no extra rows exist and the error raises
+        #     fail("Input file has more rows than output file.")
+        with pytest.raises(StopIteration):
+            next(inp_reader)
+            raise StopIteration(f"{inp_path} file has more rows than {out_path} file")
 
-        try:
-            next_out = next(out_reader)
-            fail("Output file has more rows than input file.")
-        except StopIteration:
-            pass
+        with pytest.raises(StopIteration):
+            next(out_reader)
+            raise StopIteration(f"{out_path} file has more rows than {inp_path} file.")
