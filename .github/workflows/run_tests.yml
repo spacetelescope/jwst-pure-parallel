@@ -41,5 +41,5 @@ jobs:
 
 
       - name: check_error
-        if: ${{ cancelled() || steps.run_pytests.outcome != 'success'}}
+        if: ${{ cancelled() || steps.run_pytest.outcome != 'success'}}
         run: exit 1
