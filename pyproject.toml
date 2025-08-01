@@ -32,8 +32,9 @@ content-type = "text/markdown"
 [project.optional-dependencies]
 tests = [
     "pytest",
-    "ruff",
+    "pytest-cov",
 ]
+linter = ["ruff"]
 
 
 [project.urls]
@@ -66,20 +67,22 @@ version_file = "src/jwpure/_version.py"
 
 [tool.pytest.ini_options]
 testpaths = [
-  "src/jwpure",
   "src/tests",
   ]
 # these are used to flex the pytest action
-addopts = "-rvsa" # Report extra test summary info for all tests
+addopts = "-rvsa --cov=src/jwpure --tb=auto -vv" # Report extra test summary info for all tests
 norecursedirs = ["build"]
 log_cli = true
 log_cli_level = "INFO"
 log_format = "%(asctime)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 
+[tool.coverage.report]
+omit = ["*_version.py", "__init__.py"]
 
 [tool.ruff]
 line-length = 120
+target-version = "py313"
 indent-width = 4
 exclude = [
     ".git",
@@ -88,6 +91,9 @@ exclude = [
     ".ruff_cache",
     ".vscode",
     "__pypackages__",
+    ".eggs",
+    "build",
+    "*.ipynb",
 ]
 
 [tool.ruff.lint]

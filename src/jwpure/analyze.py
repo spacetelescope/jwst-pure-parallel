@@ -11,9 +11,9 @@ DEFAULT_SLOT_DATA_PATH = resources.files('jwpure.data') / 'pure_slots.csv'
 
 
 class Scenario:
-    '''Assess a JWST pure parallel observing scenario.
+    """Assess a JWST pure parallel observing scenario.
 
-    Creates a database in memory. Loads slot data. Facilitates queries.'''
+    Creates a database in memory. Loads slot data. Facilitates queries."""
     def __init__(self, slot_data_path=DEFAULT_SLOT_DATA_PATH):
         self.slot_data_path = slot_data_path
         self.db = connect(':memory:')
@@ -29,13 +29,13 @@ class Scenario:
 
     @staticmethod
     def constraint_parameters():
-        '''Return objects representing parameters used to express constraints.
+        """Return objects representing parameters used to express constraints.
 
         Returns:
             slot (jwpure.query.DatabaseTable): slot table params
             config (jwpure.query.DatabaseTable): config table params
             visit (jwpure.query.DatabaseTable): visit table params
-        '''
+        """
         slot = DatabaseTable('slot', {
             'inst': 'Prime instrument (MIRI, NIRCam, NIRISS, NIRSpec)',
             'slotdur': 'Duration [s] of the parallel slot',
@@ -58,7 +58,7 @@ class Scenario:
     def allocate_slots(
             self, constraint=None, maxslot=999, maxconfig=999,
             trace_id=None):
-        '''Allocate pure parallel slots that obey the specifed constraints.
+        """Allocate pure parallel slots that obey the specifed constraints.
 
         Algorithm:
             1. Apply constraints on slot table to create config table.
@@ -70,7 +70,7 @@ class Scenario:
             maxslot (int, default=999): max slots to keep in a config
             maxconfig (int, default=999): max configs to keep in a visit
             trace_id (str, default=None): identifier for visit to trace
-        '''
+        """
         # Increment subset number.
         self.pure_subset += 1
         self._trace(trace_id, 'slot', f'Subset {self.pure_subset}, slot table')
@@ -86,13 +86,13 @@ class Scenario:
             full_constraint = available
         where_slot = where_clause(full_constraint, only_table='slot')
         self.cursor.execute('DROP TABLE IF EXISTS config')
-        self.cursor.execute(f'''
+        self.cursor.execute(f"""
             CREATE TABLE config AS
             SELECT visit_id, config_id, COUNT(*) nslot, SUM(slotdur) configdur
             FROM slot
             {where_slot}
             GROUP BY visit_id, config_id
-        ''')
+        """)
         self._trace(
            trace_id, 'config', f'Subset {self.pure_subset}, config table'
         )
@@ -100,13 +100,13 @@ class Scenario:
         # Make new `visit` table. Apply config constraint to selected slots.
         where_config = where_clause(constraint, only_table='config')
         self.cursor.execute('DROP TABLE IF EXISTS visit')
-        self.cursor.execute(f'''
+        self.cursor.execute(f"""
             CREATE TABLE visit AS
             SELECT visit_id, COUNT(*) nconfig
             FROM config
             {where_config}
             GROUP BY visit_id
-        ''')
+        """)
         self._trace(
             trace_id, 'visit', f'Subset {self.pure_subset}, visit table'
         )
@@ -115,62 +115,62 @@ class Scenario:
         where_joint = where_clause(constraint)
         self.where_joint.append(where_joint)
         self.cursor.execute('DROP TABLE IF EXISTS subset')
-        self.cursor.execute(f'''
+        self.cursor.execute(f"""
             CREATE TABLE subset AS
             SELECT visit.visit_id, config.config_id, slot.slot_id
             FROM slot
             JOIN config ON config.config_id = slot.config_id
             JOIN visit ON visit.visit_id = slot.visit_id
             {where_joint}
-        ''')
+        """)
         self._trace(
             trace_id, 'subset', f'Subset {self.pure_subset}, subset table'
         )
 
         # Index `subset` table.
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE INDEX idx_slot_id_subset
             ON subset(slot_id)
-        ''')
+        """)
 
         # Fetch visit, configuration, and slot IDs.
-        self.cursor.execute('''
+        self.cursor.execute("""
             SELECT visit_id, config_id, slot_id
             FROM subset
             ORDER BY slot_id
-        ''')
+        """)
         rows = self.cursor.fetchall()
 
         # Create empty `sequence_numbers` table.
         sequence_numbers = self._sequence_numbers(rows, maxslot, maxconfig)
         self.cursor.execute('DROP TABLE IF EXISTS sequence_numbers')
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE sequence_numbers (
                 visit_id TEXT, config_id TEXT, slot_id TEXT,
                 pure_subset INTEGER, pure_visit INTEGER,
                 pure_config INTEGER, pure_slot INTEGER)
-        ''')
+        """)
 
         # Bulk insert values into empty `sequence_numbers` table.
-        self.cursor.executemany('''
+        self.cursor.executemany("""
             INSERT INTO sequence_numbers (
                 visit_id, config_id, slot_id,
                 pure_subset, pure_visit, pure_config, pure_slot)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', sequence_numbers)
+        """, sequence_numbers)
         self._trace(
             trace_id, 'sequence_numbers',
             f'Subset {self.pure_subset}, subset table'
         )
 
         # Index `sequence_numbers` table.
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE INDEX idx_slot_id_sequence_numbers
             ON sequence_numbers(slot_id)
-        ''')
+        """)
 
         # Update `slot.pure_subset` to indicate slots used in this subset.
-        self.cursor.execute(f'''
+        self.cursor.execute("""
             UPDATE slot
             SET pure_subset = (
                     SELECT pure_subset FROM sequence_numbers sn
@@ -189,10 +189,10 @@ class Scenario:
                     WHERE sn.slot_id = slot.slot_id
                 )
             WHERE slot_id IN (SELECT slot_id FROM subset)
-        ''')
+        """)
 
     def summarize(self, path=None, table='slot'):
-        '''Summarize slot information in a table.'''
+        """Summarize slot information in a table."""
         query = (
             f'SELECT'
             f'  cycle, '
@@ -220,7 +220,7 @@ class Scenario:
         return table
 
     def save(self, path):
-        '''Save information about pure parallel slots to a file.'''
+        """Save information about pure parallel slots to a file."""
         query = (
             'SELECT * '
             'FROM slot '
@@ -230,7 +230,7 @@ class Scenario:
         self.raw_query(query, path=path)
 
     def raw_query(self, query, path=None):
-        '''Return result of an arbitrary query. Write to file, if specified.'''
+        """Return result of an arbitrary query. Write to file, if specified."""
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
         if not rows:
@@ -243,12 +243,12 @@ class Scenario:
         return table
 
     def create_database_table(self, tablename, table):
-        '''Create and load database table with contents of an astropy table.
+        """Create and load database table with contents of an astropy table.
 
         Args:
             tablename (str): Name of database table to create.
             table (astropy.table.Table): Column names, types, and values.
-        '''
+        """
         coldefs = []
         for colname, column in table.columns.items():
             coldefs.append(f'{colname} {sqltype(column.dtype)}')
@@ -258,13 +258,13 @@ class Scenario:
         insert_statement = f"INSERT INTO {tablename} VALUES ({placeholders})"
         self.cursor.executemany(insert_statement, table.as_array().tolist())
         if 'slot_id' in table.colnames:
-            self.cursor.execute(f'''
+            self.cursor.execute(f"""
                 CREATE INDEX {f'idx_slot_id_{tablename}'}
                 ON {tablename}(slot_id)
-            ''')
+            """)
 
     def _trace(self, trace_id, table, title):
-        '''Print rows in the specified table for the specified visit.'''
+        """Print rows in the specified table for the specified visit."""
         if not trace_id:
             return
         query = f'SELECT * FROM {table} WHERE visit_id = "{trace_id}"'
@@ -273,17 +273,17 @@ class Scenario:
         print(table)
 
     def _sequence_numbers(self, rows, maxslot=999, maxconfig=999):
-        '''Assign sequence numbers to visits, configs, and slots.
+        """Assign sequence numbers to visits, configs, and slots.
 
         Sequence numbers begin at 1 and increment.
-        Config sequence number resets to 1 with each new visit. 
+        Config sequence number resets to 1 with each new visit.
         Slot sequence number resets to 1 with each new config.
 
         Args:
             rows (list of tuple): visit_id, config_id, and slot_id for slot
             maxslot (int, default=999): max slots to keep in a config
             maxconfig (int, default=999): max configs to keep in a visit
-        '''
+        """
         sequence_numbers = []
         prev_visit_id = None
         prev_config_id = None
@@ -315,11 +315,11 @@ class Scenario:
 
 
 def sqltype(dtype):
-    '''Return sqlite3 type corresponding to the specified astropy dtype.
+    """Return sqlite3 type corresponding to the specified astropy dtype.
 
     Args:
          dtype (numpy.dtype): data type (subclasses of int, float, str)
-    '''
+    """
     if issubdtype(dtype, int):
         return 'INTEGER'
     elif issubdtype(dtype, float):
