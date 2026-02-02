@@ -1,4 +1,5 @@
 # JWST Pure Parallel
+[![DOI](https://zenodo.org/badge/1011439218.svg)](https://zenodo.org/badge/latestdoi/1011439218)
 
 The `jwpure` software package facilitates statistical analysis of JWST pure
 parallel observing scenarios, based on historical data from previous observing
