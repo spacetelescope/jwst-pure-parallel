@@ -88,25 +88,26 @@ The output should look something like:
 ```ascii
 cycle pure_subset nslot nconfig nvisit hours
 ----- ----------- ----- ------- ------ -----
-    1           0 20564    6096   2074  2433
-    1           1  1197     399    133   140
-    1           2   153      51     17    16
-    1           3   498     166     83    67
-    2           0 16035    4719   1769  1818
-    2           1   711     237     79   100
+    1           0 22017    6558   2173  2708
+    1           1  1530     510    170   194
+    1           2   189      63     21    20
+    1           3   528     176     88    71
+    2           0 16949    4974   1828  1970
+    2           1   855     285     95   125
     2           2    54      18      6     6
     2           3   468     156     78    59
-    3           0 14201    3571   1553  2149
-    3           1   840     280     94   104
-    3           2   117      39     13    13
-    3           3   300     100     50    44
-    4           0 23181    6285   2382  3228
-    4           1   954     318    106   112
-    4           2   126      42     14    13
-    4           3   402     134     67    54
-Subset 1: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 3)
-Subset 2: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 3)
-Subset 3: WHERE (((slot.inst != 'NIRCam' AND slot.slotdur BETWEEN 300 AND 900) AND config.nslot >= 3) AND visit.nconfig >= 2)
+    3           0 15375    3924   1640  2354
+    3           1  1101     367    123   147
+    3           2   189      63     21    23
+    3           3   312     104     52    46
+    4           0 19561    5764   2012  3308
+    4           1  1647     549    183   211
+    4           2   216      72     24    23
+    4           3   552     184     92    75
+    5           0 18569    4903   1953  2790
+    5           1   972     324    108   140
+    5           2   207      69     23    26
+    5           3   252      84     42    33
 wrote scenario_slots.csv
 ```
 Output is sorted by observing cycle. Each previous cycle provides a rough estimate of what might be available in future cycles. Each cycle has one row for unallocated slots (`pure_subset == 0`) and one row for each pass (`pure_subset > 0`).
