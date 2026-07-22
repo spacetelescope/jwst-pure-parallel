@@ -3,16 +3,42 @@ name: release
 on:    
   release:
     types: [ released ]
+  workflow_dispatch:
+    inputs:
+      git_tag:
+        description: 'Target Git Tag'
+        required: true
+        type: string
 
 permissions: {}
 
 jobs:
-  
-  build:
-    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release')
+  validate:
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
-      - name: Get Release
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches all history and tags
+      - name: Validate Tag Exists
+        run: |
+          USER_TAG="${{ github.event.inputs.git_tag }}"
+          # Check if the tag exists in the repository
+          if git rev-parse --verify --quiet "refs/tags/$USER_TAG" > /dev/null; then
+            echo "✅ Tag '$USER_TAG' is valid."
+            echo "TAG=$USER_TAG" >> $GITHUB_ENV
+          else
+            echo "❌ Error: Tag '$USER_TAG' does not exist in this repository."
+            exit 1
+          }
+  
+  build:
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Release Tag
+        if: (github.event_name == 'release')
         run: |
           echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           echo "Release being made from $TAG "
