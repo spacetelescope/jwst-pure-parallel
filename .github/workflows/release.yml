@@ -1,0 +1,99 @@
+name: release
+
+on:    
+  release:
+    types: [ released ]
+
+permissions: {}
+
+jobs:
+  
+  build:
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel' && (github.event_name == 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Release tag
+        run: |
+        echo "Release being made from tag: ${{ github.event.release.tag_name }}"
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-tags: true
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: ${{ vars.PYTHON_VERSION }}   
+
+      - name: Build the package
+        run: |
+          python -m pip install build twine
+          python -m build --sdist --wheel .
+          ls -lh dist
+          python -m twine check --strict dist/*
+
+      - name: Upload build artifacts
+        if: (github.event_name == 'release')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: additional-pylons
+          path: dist/
+
+  publish-to-testpypi:
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release') && (github.event.action == 'released')
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      attestations: write
+    # To add required reviewers before publish,
+    # edit the protection rules in GitHub Settings:
+    # Settings > Environments > pypi > Add required reviewers
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/jwpure
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: additional-pylons*
+          path: dist/
+          merge-multiple: true
+      
+      - uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: "dist/*"
+      
+      # To upload to PyPI without a token, add this workflow file as a Trusted Publisher in the project settings on the PyPI website
+      - uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # v1.14.1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-to-pypi:
+    needs: [build, publish-to-testpypi]
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release') && (github.event.action == 'released')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      attestations: write
+    # To add required reviewers before publish,
+    # edit the protection rules in GitHub Settings:
+    # Settings > Environments > pypi > Add required reviewers
+    environment:
+      name: pypi
+      url: https://pypi.org/p/jwpure
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: additional-pylons*
+          path: dist/
+          merge-multiple: true
+      
+      - uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: "dist/*"
+      
+      # To upload to PyPI without a token, add this workflow file as a Trusted Publisher in the project settings on the PyPI website
+      - uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # v1.14.1
+
