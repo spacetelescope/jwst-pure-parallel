@@ -34,7 +34,8 @@ jobs:
           fi
   
   build:
-    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+    needs: [validate]
+    if: ${{ !cancelled() && (needs.validate.result == 'success' || needs.validate.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - name: Get Release Tag
