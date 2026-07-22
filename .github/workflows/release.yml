@@ -31,7 +31,7 @@ jobs:
           else
             echo "❌ Error: Tag '$USER_TAG' does not exist in this repository."
             exit 1
-          }
+          fi
   
   build:
     if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
@@ -44,7 +44,7 @@ jobs:
           echo "Release being made from $TAG "
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ env.TAG }}
           fetch-tags: true
           fetch-depth: 0
           persist-credentials: false
