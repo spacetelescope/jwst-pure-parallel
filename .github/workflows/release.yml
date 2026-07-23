@@ -16,36 +16,42 @@ jobs:
   validate:
     if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    outputs:
+      job_tag: ${{ steps.tag_name.outputs.tag }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # Fetches all history and tags
       - name: Validate Tag Exists
+        id: tag_name
         run: |
           USER_TAG="${{ github.event.inputs.git_tag }}"
           # Check if the tag exists in the repository
           if git rev-parse --verify --quiet "refs/tags/$USER_TAG" > /dev/null; then
             echo "✅ Tag '$USER_TAG' is valid."
-            echo "TAG=refs/tags/$USER_TAG" >> $GITHUB_ENV
+            echo "tag=refs/tags/$USER_TAG" >> $GITHUB_OUTPUT
           else
             echo "❌ Error: Tag '$USER_TAG' does not exist in this repository."
             exit 1
           fi
+        
   
   build:
     needs: [validate]
     if: ${{ !cancelled() && (needs.validate.result == 'success' || needs.validate.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Get Release Tag
+      - name: Get Release Tag From Release
         if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release')
         run: |
-          echo "TAG=refs/tags/${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-          echo "Release being made from $TAG "
-      - name: Check release tag exists
-        if: ${{ env.TAG != '' }}
-        run: echo "$TAG exists and is not empty."
+          echo "TAG=${{ github.ref }}" >> $GITHUB_ENV
+          echo "Release being made from ${{ env.TAG }} "
+      - name: Get Release Tag from User
+        if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'workflow_dispatch')
+        run: |
+          echo "TAG=${{ needs.validate.outputs.job_tag }} >> $GITHUB_ENV
+          echo "Release being made from ${{ env.TAG }} "
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
