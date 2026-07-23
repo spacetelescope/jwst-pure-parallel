@@ -44,7 +44,7 @@ jobs:
           echo "TAG=refs/tags/${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           echo "Release being made from $TAG "
       - name: Check release tag exists
-        if: ${{ env.TAG }} != ''
+        if: ${{ env.TAG != '' }}
         run: echo "$TAG exists and is not empty."
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
