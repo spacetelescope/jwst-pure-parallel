@@ -39,11 +39,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Release Tag
-        if: (github.event_name == 'release')
+        if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release')
         run: |
           echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           echo "Release being made from $TAG "
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ env.TAG }}
           fetch-tags: true
@@ -61,15 +62,14 @@ jobs:
           python -m twine check --strict dist/*
 
       - name: Upload build artifacts
-        if: (github.event_name == 'release')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: additional-pylons
           path: dist/
 
   publish-to-testpypi:
-    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release') && (github.event.action == 'released')
     needs: [build]
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel')
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
@@ -98,7 +98,7 @@ jobs:
 
   publish-to-pypi:
     needs: [build, publish-to-testpypi]
-    if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release') && (github.event.action == 'released')
+    if: (github.repository == 'spacetelescope/jwst-pure-parallel')
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
