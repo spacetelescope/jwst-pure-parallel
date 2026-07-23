@@ -50,7 +50,7 @@ jobs:
       - name: Get Release Tag from User
         if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'workflow_dispatch')
         run: |
-          echo "TAG=${{ needs.validate.outputs.job_tag }} >> $GITHUB_ENV
+          echo "TAG=${{ needs.validate.outputs.job_tag }}" >> $GITHUB_ENV
           echo "Release being made from ${{ env.TAG }} "
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -106,7 +106,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
   publish-to-pypi:
-    needs: [publish-to-testpypi]
+    needs: [build, publish-to-testpypi]
     if: (!cancelled() && github.repository == 'spacetelescope/jwst-pure-parallel')
     runs-on: ubuntu-latest
     permissions:
