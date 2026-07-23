@@ -27,7 +27,7 @@ jobs:
           # Check if the tag exists in the repository
           if git rev-parse --verify --quiet "refs/tags/$USER_TAG" > /dev/null; then
             echo "✅ Tag '$USER_TAG' is valid."
-            echo "TAG=$USER_TAG" >> $GITHUB_ENV
+            echo "TAG=refs/tags/$USER_TAG" >> $GITHUB_ENV
           else
             echo "❌ Error: Tag '$USER_TAG' does not exist in this repository."
             exit 1
@@ -41,12 +41,15 @@ jobs:
       - name: Get Release Tag
         if: (github.repository == 'spacetelescope/jwst-pure-parallel') && (github.event_name == 'release')
         run: |
-          echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          echo "TAG=refs/tags/${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           echo "Release being made from $TAG "
+      - name: Check release tag exists
+        if: ${{ env.TAG }} != ''
+        run: echo "$TAG exists and is not empty."
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          ref: '${{ env.TAG }}'
+          ref: ${{ env.TAG }}
           persist-credentials: false
           fetch-depth: 0
           fetch-tags: true
@@ -97,8 +100,8 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
   publish-to-pypi:
-    needs: [build, publish-to-testpypi]
-    if: (github.repository == 'spacetelescope/jwst-pure-parallel')
+    needs: [publish-to-testpypi]
+    if: (!cancelled() && github.repository == 'spacetelescope/jwst-pure-parallel')
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
